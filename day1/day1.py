@@ -19,7 +19,7 @@ def find_triplet(numbers, target):
             missing_c = target - (a + b)
             if missing_c in seen:
                 return a, b, missing_c
-            seen.add(a)
+            seen.add(b)
 
 file = './day1/input'
 numbers = get_lines_as_number(file)
