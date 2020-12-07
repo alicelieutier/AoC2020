@@ -1,5 +1,4 @@
 import sys
-# import re
 from functools import reduce
 
 def parse_file(filename):
