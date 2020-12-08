@@ -1,5 +1,5 @@
 import sys
-import itertools
+from itertools import count
 from functools import reduce
 
 def parse_lines(filename):
@@ -13,7 +13,7 @@ def has_tree(lines, index_right, index_down):
 def count_trees(lines, slope):
     down, right = slope
     positions_down = range(0, len(lines), down)
-    positions_right = itertools.count(start=0, step=right)
+    positions_right = count(start=0, step=right)
     def aux(acc, position):
         down, right = position
         return acc + 1 if has_tree(lines, right, down) else acc
