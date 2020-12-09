@@ -6,7 +6,7 @@ import sys
 
 def parse_things(filename):
     f = open(filename)
-    return [parse_thing(line) for line in f.readlines()]
+    return [parse_thing(line.strip()) for line in f.readlines()]
 
 LINE_PATTERN = re.compile(r'hgt:(?P<height>\d+)(?P<unit>cm|in)(\s|$)')
 def parse_thing(line):
