@@ -48,14 +48,11 @@ def memoize(f):
         return memo[x]
     return helper
 
-def prev_reachable_nodes(to_node, set_of_all_nodes):
-    return [n for n in range(to_node - 3, to_node) if n in set_of_all_nodes]
-
 @memoize
 def ways_to_reach_node_recursive(node):
-    if node == source:
+    if node == device:
         return 1
-    prev_possible = prev_reachable_nodes(node, sorted_adaptors)
-    return sum((ways_to_reach_node_recursive(prev_node) for prev_node in prev_possible))
+    next_possible = next_reachable_nodes(node, sorted_adaptors)
+    return sum((ways_to_reach_node_recursive(next_node) for next_node in next_possible))
 
-print(ways_to_reach_node_recursive(device))
+print(ways_to_reach_node_recursive(source))
