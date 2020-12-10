@@ -31,7 +31,7 @@ ways_to_reach_node = {a: 0 for a in joltages}
 ways_to_reach_node[source] = 1
 
 for node in sorted_adaptors[:-1]:
-    next_possible = next_reachable_nodes(node, ways_to_reach_node.keys())
+    next_possible = next_reachable_nodes(node, ways_to_reach_node)
     for next_node in next_possible:
         ways_to_reach_node[next_node] += ways_to_reach_node[node]
 
