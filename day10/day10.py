@@ -1,8 +1,4 @@
 import sys
-# import re
-# from functools import reduce
-# from collections import deque
-# from itertools import count
 
 def parse_joltages(filename):
     f = open(filename)
