@@ -1,6 +1,5 @@
 import sys
 import re
-# from collections import deque
 
 def parse_rules(filename):
     f = open(filename)
@@ -48,12 +47,12 @@ for out_colour, insides in rules:
     for nb, colour in insides:
         tree[out_colour].extend([colour for _ in range(nb)]) 
 
-children = 0
+nb_of_children = 0
 queue = tree['shiny gold']
 
 while len(queue) > 0:
     node = queue.pop()
-    children += 1
+    nb_of_children += 1
     queue.extend(tree[node])
 
-print(children)
+print(nb_of_children)
