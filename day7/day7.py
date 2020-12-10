@@ -1,6 +1,6 @@
 import sys
 import re
-from collections import deque
+# from collections import deque
 
 def parse_rules(filename):
     f = open(filename)
@@ -30,10 +30,10 @@ for out_colour, insides in rules:
         parent_graph[in_colour].append(out_colour)
 
 ancestors = set(parent_graph['shiny gold'])
-queue = deque(parent_graph['shiny gold'])
+queue = parent_graph['shiny gold']
 
 while len(queue) > 0:
-    node = queue.popleft()
+    node = queue.pop()
     parents = parent_graph[node]
     ancestors.update(parents)
     queue.extend(parents)
@@ -49,10 +49,10 @@ for out_colour, insides in rules:
         tree[out_colour].extend([colour for _ in range(nb)]) 
 
 children = 0
-queue = deque(tree['shiny gold'])
+queue = tree['shiny gold']
 
 while len(queue) > 0:
-    node = queue.popleft()
+    node = queue.pop()
     children += 1
     queue.extend(tree[node])
 
