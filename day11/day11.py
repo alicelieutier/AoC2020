@@ -1,11 +1,12 @@
 import sys
-from functools import reduce
-from itertools import count
+from functools import reduce, lru_cache
+from itertools import count, islice
 
 def parse_seats(filename):
     f = open(filename)
     return [list(line.strip()) for line in f.readlines()]
 
+# using a flattened array because why not, using this method to read i,j values
 def get(map, i, j):
     return map[i * J_DIMENSION + j]
 
@@ -21,20 +22,14 @@ def is_empty(map, i, j):
 def is_occupied(map, i, j):
     return get(map, i, j) == '#'
 
-def memoize_two_args(fun):
-    memo = {}
-    def helper(x, y):
-        if (x, y) not in memo:            
-            memo[(x, y)] = fun(x, y)
-        return memo[(x, y)]
-    return helper
-
-@memoize_two_args
+# remember the set of adjacent seat coordinates for any given seat
+@lru_cache(maxsize=None)
 def adjacent_seats(x, y):
     adjacent_coords = {(i, j) for i in range(x-1, x+2) for j in range(y-1, y+2)} - {(x, y)}
     seats_only = {(i, j) for (i, j) in adjacent_coords if is_within_bounds(i, j) and is_seat(i, j)}
     return seats_only
 
+# finds next visible seat in a direction, returns None if the edge is visible instead
 def next_visible_seat(x, y, direction):
     dx, dy = direction
     gen_seats_in_direction = (coord for coord in  zip(count(x + dx, dx), count(y + dy, dy)))
@@ -45,39 +40,44 @@ def next_visible_seat(x, y, direction):
             return (i, j)
 
 EIGHT_DIRECTIONS = {(i, j) for i in range(-1, 2) for j in range(-1, 2)} - {(0, 0)}
-@memoize_two_args
+
+# remember the set of visible seat coordinates for any given seat
+@lru_cache(maxsize=None)
 def visible_seats(x, y):
     visible_seats = {next_visible_seat(x, y, direction) for direction in EIGHT_DIRECTIONS} - { None }
     return visible_seats
 
 def four_or_more(iterable):
-    return len([i for i in iterable if i == True]) >= 4
+    return iterable.count(True) >= 4
 
 def five_or_more(iterable):
-    return len([i for i in iterable if i == True]) >= 5
+    return iterable.count(True) >= 5
 
 ADJACENT_SEATS_RULES = {
     '.': lambda *args : '.',
     'L': lambda map, i, j : '#' if all([is_empty(map, x, y) for (x,y) in adjacent_seats(i, j)]) else 'L',
-    '#': lambda map, i, j : 'L' if four_or_more([is_occupied(map, x, y) for (x,y) in adjacent_seats(i, j)]) else '#'
+    '#': lambda map, i, j : 'L' if four_or_more([is_occupied(map, x, y) for (x, y) in adjacent_seats(i, j)]) else '#'
 }
 
 VISIBLE_SEATS_RULES = {
     '.': lambda *args : '.',
     'L': lambda map, i, j : '#' if all([is_empty(map, x, y) for (x,y) in visible_seats(i, j)]) else 'L',
-    '#': lambda map, i, j : 'L' if five_or_more([is_occupied(map, x, y) for (x,y) in visible_seats(i, j)]) else '#'
+    '#': lambda map, i, j : 'L' if five_or_more([is_occupied(map, x, y) for (x, y) in visible_seats(i, j)]) else '#'
 }
 
-def get_tick(rule):
+# get the ticker for a given set of rules
+def get_tick(rules):
     def aux(map):
-        apply_rule = lambda map, i, j : rule[get(map, i, j)](map, i, j)
-        return [apply_rule(map, i, j) for i in range(I_DIMENSION) for j in range(J_DIMENSION)]
+        apply_rules = lambda map, i, j : rules[get(map, i, j)](map, i, j)
+        # this order - for i then for j - is important, otherwise it transposes the grid everytime
+        return [apply_rules(map, i, j) for i in range(I_DIMENSION) for j in range(J_DIMENSION)]
     return aux
 
-# used for debugging
+# pretty print used for debugging
 def pretty_print(map):
-    print('\n'.join([''.join(map[J_DIMENSION * i : J_DIMENSION * (i+1)]) for i in range(I_DIMENSION)]))
+    print('\n'.join([''.join(islice(map, J_DIMENSION * i, J_DIMENSION * (i+1))) for i in range(I_DIMENSION)]))
 
+# will return the number of occupied seats once stable
 def find_stable_state(map, tick):
     count = 0
     new_map = tick(map)

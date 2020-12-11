@@ -1,4 +1,5 @@
 import sys
+from functools import lru_cache
 
 def parse_joltages(filename):
     f = open(filename)
@@ -39,16 +40,7 @@ def ways_to_reach_device_iterative(device):
 
 print(ways_to_reach_device_iterative(device))
 
-# part 2 recursive
-def memoize(f):
-    memo = {}
-    def helper(x):
-        if x not in memo:            
-            memo[x] = f(x)
-        return memo[x]
-    return helper
-
-@memoize
+@lru_cache(maxsize=len(joltages))
 def ways_to_reach_node_recursive(node):
     if node == device:
         return 1
