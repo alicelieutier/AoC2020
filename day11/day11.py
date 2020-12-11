@@ -32,7 +32,7 @@ def adjacent_seats(x, y):
 # finds next visible seat in a direction, returns None if the edge is visible instead
 def next_visible_seat(x, y, direction):
     dx, dy = direction
-    gen_seats_in_direction = (coord for coord in  zip(count(x + dx, dx), count(y + dy, dy)))
+    gen_seats_in_direction = (coord for coord in zip(count(x + dx, dx), count(y + dy, dy)))
     for (i, j) in gen_seats_in_direction:
         if not is_within_bounds(i, j):
             return None
@@ -67,11 +67,10 @@ VISIBLE_SEATS_RULES = {
 
 # get the ticker for a given set of rules
 def get_tick(rules):
-    def aux(map):
+    def tick(map):
         apply_rules = lambda map, i, j : rules[get(map, i, j)](map, i, j)
-        # this order - for i then for j - is important, otherwise it transposes the grid everytime
         return [apply_rules(map, i, j) for i in range(I_DIMENSION) for j in range(J_DIMENSION)]
-    return aux
+    return tick
 
 # pretty print used for debugging
 def pretty_print(map):
