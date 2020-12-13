@@ -21,6 +21,8 @@ def find_timestamp_for_buses(buses):
         timestamp, factors_until_now = acc
         bus_id, _ = bus
         while not is_valid_timestamp_for_bus(bus, timestamp):
+            # Trying to get to this new modulo by only adding multiples
+            # of the previous factors to not disturb the previous modulo.
             timestamp += factors_until_now
         return timestamp, factors_until_now * bus_id
     return reduce(aux, buses, (0, 1))
