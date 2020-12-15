@@ -9,7 +9,7 @@ def print_number_at_turns(turns, starting_numbers):
     last_spoken = starting_numbers[-1]
     turn = len(starting_numbers)
 
-    for turn_to_print in turns:
+    for turn_to_print in sorted(turns):
         while turn < turn_to_print:
             last_time_spoken = last_turn_spoken.get(last_spoken, None)
             spoken = 0 if last_time_spoken is None else (turn - last_time_spoken)
