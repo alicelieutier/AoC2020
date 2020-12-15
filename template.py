@@ -16,4 +16,4 @@ def parse_thing(line):
 
 # change the input here
 file = './dayX/input'
-rules = parse_things(file)
+things = parse_things(file)
