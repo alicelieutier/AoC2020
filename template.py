@@ -1,8 +1,8 @@
 import sys
 # import re
-# from functools import reduce
+# from functools import reduce, lru_cache
 # from collections import deque
-# from itertools import count
+# from itertools import count, islice
 
 def parse_things(filename):
     f = open(filename)
