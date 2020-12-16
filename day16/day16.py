@@ -42,20 +42,13 @@ def valid_intervals_for_number(number, intervals):
 
 def get_valid_fields_for_number_checker(fields, intervals):
     fields_by_interval = fields_interval_mapping(fields)
-
+    memo = {}
     def valid_fields(number):
-        valid_intervals = valid_intervals_for_number(number, intervals)
-        return {fields_by_interval[interval] for interval in valid_intervals}
-
-    def memoize(f):
-        memo = {}
-        def helper(x):
-            if x not in memo:            
-                memo[x] = f(x)
-            return memo[x]
-        return helper
-    
-    return memoize(valid_fields)
+        if number not in memo:
+            valid_intervals = valid_intervals_for_number(number, intervals)
+            memo[number] = {fields_by_interval[interval] for interval in valid_intervals}
+        return memo[number]
+    return valid_fields
 
 @lru_cache(maxsize=None)
 def is_valid_for_interval(number, interval):
@@ -64,6 +57,22 @@ def is_valid_for_interval(number, interval):
 
 def is_valid_ticket(ticket, intervals):
     return all((is_valid(number, intervals) for number in ticket))
+
+def simplify_names(possible_names_sets):
+    # this algorithm will not work unless some columns have only one candidate
+    min_length = min((len(candidates) for candidates in possible_names_sets))
+    assert(min_length == 1)
+
+    assigned_field_names = {}
+    max_length = max((len(candidates) for candidates in possible_names_sets))
+    while max_length > 0:
+        # find columns with just one possible field
+        assigned_field_names.update({candidates.pop(): index for index, candidates in enumerate(possible_names_sets) if len(candidates) == 1})
+        # remove it from other columns
+        for candidates in possible_names_sets:
+            candidates -= set(assigned_field_names.keys())
+        max_length = max((len(candidates) for candidates in possible_names_sets))
+    return [name for name, order in sorted(assigned_field_names.items(), key=lambda item: item[1])]
 
 # change the input here
 file = './day16/input'
@@ -76,29 +85,17 @@ print(sum(invalid_numbers))
 
 # Part 2
 valid_tickets = [ticket for ticket in parse_tickets(other_tickets) if is_valid_ticket(ticket, intervals)]
+nb_of_columns = len(valid_tickets[0])
+
+# transpose valid tickets
+columns = [[ticket[i] for ticket in valid_tickets] for i in range(nb_of_columns)]
+
 field_names_for_number = get_valid_fields_for_number_checker(fields, intervals)
 
-nb_of_fields = len(valid_tickets[0])
-possible_fields_in_order = []
+candidate_names_for_columns = [reduce(lambda a, b : a & b, [field_names_for_number(number) for number in column]) for column in columns]
 
-for i in range(nb_of_fields):
-    possible_field_names = [field_names_for_number(ticket[i]) for ticket in valid_tickets]
-    possible_fields_in_order.append(reduce(lambda a, b : a & b, possible_field_names))
-
-min_length = min((len(candidates) for candidates in possible_fields_in_order))
-assert(min_length == 1) # this algorithm will not work unless some fields have only one candidate
-
-assigned_field_names = {}
-max_length = max((len(candidates) for candidates in possible_fields_in_order))
-while max_length > 0:
-    # find columns with just one possible field
-    assigned_field_names.update({candidates.pop(): index for index, candidates in enumerate(possible_fields_in_order) if len(candidates) == 1})
-    # remove it from other columns
-    for candidates in possible_fields_in_order:
-        candidates -= set(assigned_field_names.keys())
-    max_length = max((len(candidates) for candidates in possible_fields_in_order))
-
-departure_fields_positions = [position for (name, position) in assigned_field_names.items() if name.find('departure') == 0]
+field_names = simplify_names(candidate_names_for_columns)
 my_ticket_values = parse_tickets(my_ticket)[0]
-departure_fields_values = [my_ticket_values[pos] for pos in departure_fields_positions]
+
+departure_fields_values = [value for value, field in zip(my_ticket_values, field_names) if field.find('departure') == 0]
 print(reduce(lambda a, b: a * b, departure_fields_values, 1))
