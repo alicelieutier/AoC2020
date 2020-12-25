@@ -59,10 +59,7 @@ for itinerary in directions:
     east = c['e'] - c['w'] + c['ne'] - c['sw']
     north_west = c['nw'] - c['se'] + c['ne'] - c['sw']
     # flip
-    if (east, north_west) in black_tiles:
-        black_tiles -= {(east, north_west)}
-    else:
-        black_tiles |= {(east, north_west)}
+    black_tiles ^= {(east, north_west)}
 
 print(len(black_tiles))
 
